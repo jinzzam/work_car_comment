@@ -3,6 +3,9 @@ package com.boot.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.dto.CommentDTO;
+import com.boot.dto.MemDTO;
 import com.boot.service.CommentService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +29,15 @@ public class CommentController {
 	
 	@RequestMapping("/save")
 //	public String save(@RequestParam HashMap<String, String> param, Model model) {
-	public @ResponseBody ArrayList<CommentDTO> save(@RequestParam HashMap<String, String> param) {
+	public @ResponseBody ArrayList<CommentDTO> save(@RequestParam HashMap<String, String> param, HttpServletRequest request) {
+		
+		HttpSession session = request.getSession();
+		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
+		
+		if(mDTO == null) {
+			return "redirect:login";
+		}
+		
 		log.info("@# save()");
 		log.info("@# param=>"+param);
 		

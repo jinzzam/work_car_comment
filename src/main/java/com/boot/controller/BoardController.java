@@ -44,7 +44,15 @@ public class BoardController {
 	}
 	
 	@RequestMapping("/write")
-	public String write(@RequestParam HashMap<String, String> param, Model model) {
+	public String write(@RequestParam HashMap<String, String> param, HttpServletRequest request) {
+		
+		HttpSession session = request.getSession();
+		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
+		
+		if(mDTO == null) {
+			return "redirect:login";
+		}
+		
 		log.info("@# write()");
 		log.info("@# param=>"+param);
 		service.write(param);
