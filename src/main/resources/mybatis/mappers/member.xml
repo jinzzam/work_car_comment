@@ -1,0 +1,16 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.MemDAO">
+
+    <select id="loginYn" resultType="com.boot.dto.MemDTO">
+    	select password from member_tb where member_id=#{member_id}
+    </select>
+        
+    <insert id="write">
+		insert into member_tb(member_id, name, password, nickname, email) 
+    	values(#{member_id},#{name},#{password}, ${nickname}, ${email});
+    </insert>
+
+</mapper>

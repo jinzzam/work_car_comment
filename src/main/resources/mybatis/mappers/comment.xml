@@ -1,0 +1,43 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.CommentDAO">
+    <insert id="save">
+<!--    	insert into board_comment_tb( 		-->
+<!--			   board_id 	-->
+<!--			 , member_id -->
+<!--			 , parent_comment_id	-->
+<!--			 , content)-->
+<!--		values(#{board_id},#{member_id},#{parent_comment_id},#{content})-->
+		
+		insert into board_comment_tb( 		
+			   board_id 	
+			 , member_id 
+			 , parent_comment_id	
+			 , comment_content)
+		values(#{board_id}, #{member_id}, null, #{comment_content});
+    </insert>
+
+    <select id="findAll" resultType="com.boot.dto.CommentDTO">
+<!--    	select comment_id 		-->
+<!--			 , board_id 	-->
+<!--			 , member_id 	-->
+<!--			 , parent_comment_id 			-->
+<!--			 , comment_content-->
+<!--			 , created_at, date_format(created_at, '%Y-%m-%d %H:%i') as created_at2-->
+<!--			 , updated_at, date_format(updated_at, '%Y-%m-%d %H:%i') as updated_at2-->
+<!--		  from board_comment_tb-->
+<!--		 where board_id=#{board_id}-->
+<!--		 order by comment_id-->
+
+			SELECT 
+		        comment_id, 		
+		        member_id, 	
+		        parent_comment_id, 			
+		        comment_content,
+		        created_at,  date_format(created_at, '%Y-%m-%d %H:%i') as created_at2, updated_at,  date_format(updated_at, '%Y-%m-%d %H:%i') as updated_at2  FROM board_comment_tb
+		    WHERE board_id=#{board_id}
+		    ORDER BY comment_id
+    </select>
+</mapper>

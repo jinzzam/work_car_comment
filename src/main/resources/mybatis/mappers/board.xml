@@ -1,0 +1,40 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.BoardDAO">
+
+    <select id="list" resultType="com.boot.dto.BoardDTO">
+        select board_id, member_id, title, content, view_count
+        	 , created_at, 
+        	   DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS created_at2
+        	 , updated_at, 
+               DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i') AS updated_at2
+        	 , view_count from board_tb
+    </select>
+    
+    <insert id="write">
+    	insert into board_tb(member_id, title, content) values(#{member_id},#{title},#{content})
+    </insert>
+
+    <select id="contentView" resultType="com.boot.dto.BoardDTO">
+		select board_id, member_id, title, content, view_count
+    		 , created_at, 
+        	   DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS created_at2
+        	 , updated_at, 
+               DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i') AS updated_at2
+    	  from board_tb where board_id=#{board_id}    
+   	</select>
+    
+    <update id="modify">
+    	update board_tb set title=#{title}, content=#{content} 
+    	 where board_id=#{board_id}
+    </update>
+    
+    <delete id="delete">
+    	delete from board_tb where board_id=#{board_id}
+    </delete>
+
+</mapper>
+
+	
