@@ -24,35 +24,36 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/comment")
 public class CommentController {
 	
-//	static String checkSession(HttpServletRequest request) {
-//		HttpSession session = request.getSession();
-//		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
-//		
-//		if(mDTO == null) {
-//			return "redirect:logout";
-//		}
-//		return "redirect:comment/save";	
-//	}
-	
-	
 	@Autowired
 	private CommentService service;
 	
 	@RequestMapping("/save")
 //	public String save(@RequestParam HashMap<String, String> param, Model model) {
 	public @ResponseBody ArrayList<CommentDTO> save(@RequestParam HashMap<String, String> param, HttpServletRequest request) {
-//		checkSession(request);
-		
 		log.info("@# save()");
 		log.info("@# param=>"+param);
 		
 		String boardId = param.get("board_id");
 		log.info("@# boardIdStr=>"+boardId);
-//	    Integer boardId = Integer.parseInt(boardIdStr);
 		
-//	    param.put("board_id", boardId); // service.findAll을 위해 param 맵에 board_id 추가
+		CommentDTO comment = new CommentDTO();
+	    comment.setBoard_id(param.get("board_id")); // String
+	    comment.setMember_id(param.get("member_id"));
+	    comment.setComment_content(param.get("comment_content"));
+	    
+	    try {
+	        comment.setParent_comment_id(Integer.parseInt(param.get("parent_comment_id")));
+	    } catch (NumberFormatException e) {
+	        comment.setParent_comment_id(0); // 예외 발생 시 기본값 0 설정
+	    }
+		
 		service.save(param);
-		ArrayList<CommentDTO> commentList = service.findAll(param);
+		
+		HashMap<String, String> queryParam = new HashMap<>();
+//		queryParam.put("board_id", Integer.parseInt(param.get("board_id")));
+		queryParam.put("board_id", param.get("board_id")); // String 그대로 전달
+		
+		ArrayList<CommentDTO> commentList = service.findAll(queryParam);
 	    
 		
 //		return "redirect:list";
