@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +38,7 @@ public class CommentController {
 		log.info("@# boardIdStr=>"+boardId);
 		
 		CommentDTO comment = new CommentDTO();
+		comment.setComment_id(Integer.parseInt(param.get("comment_id")));
 	    comment.setBoard_id(param.get("board_id")); // String
 	    comment.setMember_id(param.get("member_id"));
 	    comment.setComment_content(param.get("comment_content"));
@@ -55,9 +57,24 @@ public class CommentController {
 		
 		ArrayList<CommentDTO> commentList = service.findAll(queryParam);
 	    
-		
-//		return "redirect:list";
 		return commentList;
+	}
+	
+	@GetMapping("/findAll")
+	public @ResponseBody ArrayList<CommentDTO> findAll(@RequestParam HashMap<String, String> param) {
+		log.info("@# findAll()");
+		log.info("@# param=>"+param);
+		
+		String boardId = param.get("board_id");
+		log.info("@# boardIdStr=>"+boardId);
+		
+		HashMap<String, String> queryParam = new HashMap<>();
+		queryParam.put("board_id", boardId); // String 그대로 전달
+		
+		ArrayList<CommentDTO> commentList = service.findAll(queryParam);
+		
+		return commentList;
+	    
 	}
 	
 

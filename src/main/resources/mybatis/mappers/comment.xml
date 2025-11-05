@@ -25,7 +25,7 @@
 		#{comment_content})
     </insert>
 
-    <select id="findAll" resultType="com.boot.dto.CommentDTO">
+    <select id="findAll" parameterType="java.util.HashMap" resultType="com.boot.dto.CommentDTO">
 <!--    	select comment_id 		-->
 <!--			 , board_id 	-->
 <!--			 , member_id 	-->
@@ -37,16 +37,16 @@
 <!--		 where board_id=#{board_id}-->
 <!--		 order by comment_id-->
 
-			SELECT 
-		       	  comment_id, 		
-		          member_id, 	
-		          parent_comment_id, 			
-		          comment_content,
-		          created_at,  date_format(created_at, '%Y-%m-%d %H:%i') as created_at2, 
-		          updated_at,  date_format(updated_at, '%Y-%m-%d %H:%i') as updated_at2  
-		     FROM board_comment_tb
-		    WHERE board_id=#{board_id}
-		    ORDER BY comment_id
+			SELECT comment_id, 
+		     	   board_id,		
+		           member_id, 	
+		           parent_comment_id, 			
+		           comment_content,
+		           created_at,  date_format(created_at, '%Y-%m-%d %H:%i') as created_at2, 
+		           updated_at,  date_format(updated_at, '%Y-%m-%d %H:%i') as updated_at2  
+		      FROM board_comment_tb
+		     WHERE board_id = #{board_id}
+		     ORDER BY comment_id
     </select>
 
 </mapper>
