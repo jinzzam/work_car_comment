@@ -24,19 +24,24 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/comment")
 public class CommentController {
 	
+//	static String checkSession(HttpServletRequest request) {
+//		HttpSession session = request.getSession();
+//		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
+//		
+//		if(mDTO == null) {
+//			return "redirect:logout";
+//		}
+//		return "redirect:comment/save";	
+//	}
+	
+	
 	@Autowired
 	private CommentService service;
 	
 	@RequestMapping("/save")
 //	public String save(@RequestParam HashMap<String, String> param, Model model) {
 	public @ResponseBody ArrayList<CommentDTO> save(@RequestParam HashMap<String, String> param, HttpServletRequest request) {
-		
-		HttpSession session = request.getSession();
-		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
-		
-		if(mDTO == null) {
-			return "redirect:login";
-		}
+//		checkSession(request);
 		
 		log.info("@# save()");
 		log.info("@# param=>"+param);
@@ -53,5 +58,7 @@ public class CommentController {
 //		return "redirect:list";
 		return commentList;
 	}
+	
+
 	
 }

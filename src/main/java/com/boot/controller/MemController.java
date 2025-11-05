@@ -89,14 +89,29 @@ public class MemController {
 		
 		return "login";
 	}
+//	@RequestMapping("/logout_mem")
+//	public String logout(HttpServletRequest request) {
+//		log.info("@# logout()");
+//		
+//		HttpSession session = request.getSession();
+//		session.invalidate();
+//		
+//		return "login";
+//	}
+	
 	@RequestMapping("/logout")
 	public String logout(HttpServletRequest request) {
-		log.info("@# logout()");
-		
 		HttpSession session = request.getSession();
-		session.invalidate();
-		
-		return "login";
+		log.info("@# logout()");
+		log.info("@# session => " + session.getSessionContext());
+		if(session.getAttribute("LOGIN_MEMBER") == null) {
+			log.info("이미 세션이 만료되었습니다.");
+		}else {
+			log.info("@# 로그인 세션 =>" + session.getAttribute("LOGIN_MEMBER"));
+			log.info("세션을 삭제합니다.");
+			session.invalidate();
+		}
+		return "redirect:login";
 	}
 }
 

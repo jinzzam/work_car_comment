@@ -14,9 +14,4 @@
 	<input type="button" href="history.go(-1)" value="아니오">
 </body>
 </html>
-<script>
-	function func_logout () {
-        
-    }
-</script>
-	
+<%  %>	
