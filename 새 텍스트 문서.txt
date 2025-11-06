@@ -1,0 +1,62 @@
+-- ===============================
+-- 3️⃣ 게시판 테이블
+-- ===============================
+CREATE TABLE board_tb (
+    board_id    INT AUTO_INCREMENT PRIMARY KEY,
+    member_id   VARCHAR(20) NOT NULL,
+    title       VARCHAR(200) NOT NULL,
+    content     TEXT NOT NULL,
+    view_count  INT DEFAULT 0 NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES member_tb(member_id)
+);
+
+select * from board_tb;
+
+-- ===============================
+-- 4️⃣ 댓글 / 대댓글 테이블
+-- ===============================
+CREATE TABLE board_comment_tb (
+    comment_id          INT AUTO_INCREMENT PRIMARY KEY,
+    board_id            INT NOT NULL,
+    member_id           VARCHAR(20) NOT NULL,
+    parent_comment_id   INT NULL,
+    comment_content     VARCHAR(1000) NOT NULL,
+    created_at          timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at          timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (board_id) REFERENCES board_tb(board_id) ON DELETE CASCADE,
+    FOREIGN KEY (member_id) REFERENCES member_tb(member_id),
+    FOREIGN KEY (parent_comment_id) REFERENCES board_comment_tb(comment_id) ON DELETE CASCADE
+);
+
+
+select * from member_tb;
+alter table board_comment_tb modify parent_comment_id int default null;
+
+ALTER TABLE board_comment_tb
+MODIFY COLUMN parent_comment_id INT NULL;
+
+insert into member_tb (member_id, name, password, nickname, email, phone_number)
+	 values('aaa', 'youjin', '123', 'jinny', 'zinzzam@daum.net', '010-2974-1693');
+
+drop table board_comment_tb;
+delete from board_comment_tb;
+
+select * from board_comment_tb;
+select * from board_comment_tb where board_id=2;
+
+insert into board_comment_tb( 		
+			   board_id 	
+			 , member_id 
+			 , parent_comment_id	
+			 , comment_content)
+		values(3,'aaa',null,'카리나는 신이야');
+        
+        
+SHOW CREATE DATABASE ev;
+SHOW CREATE TABLE board_comment_tb;
+
+ALTER DATABASE ev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE board_comment_tb CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE board_comment_tb MODIFY comment_content TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
