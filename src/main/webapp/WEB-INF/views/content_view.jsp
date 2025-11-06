@@ -86,14 +86,19 @@
 	
 
 <script>
-	$("#write-comment-btn").on('click', commentWrite);
+//	$("#write-comment-btn").on('click', commentWrite());
+//	$("#write-comment-btn").on('click', commentWrite);
+	$("#write-comment-btn").off('click').on('click', commentWrite);
 		function commentWrite() {
-
-//<!--			const commentId = $("#comment_id").val();-->
+			let commentId = $("#comment_id").val();
 			const writer = $("#member_id").val();
 			const commentContent = $("#comment_content").val();
 			const boardId = "${content_view.board_id}";
-			const parentCommentId = $("#parent_comment_id").val();
+			let parentCommentId = $("#parent_comment_id").val();
+			
+			if (parentCommentId === '' || parentCommentId === undefined || parentCommentId === null) {
+			        parentCommentId = null; 
+			}
 			
 			if (!writer || !commentContent) {
 			    alert("작성자와 내용을 모두 입력해주세요.");
@@ -103,6 +108,7 @@
 			$.ajax({
 				type:"post"
 				,url:"/comment/save"
+				,dataType: "json"
 				,data:{
 				   	board_id : boardId,
 					member_id : writer,
@@ -112,13 +118,12 @@
 				}
 				,success: function(commentList){
 					console.log("작성 성공");
-					console.log(commentList);
+					console.log("@# 작성 후=>" + commentList);
 					
 					// 폼 초기화 및 대댓글 모드 해제
 		            $("#member_id").val('');
 		            $("#comment_content").val('');
 		            fn_cancel_reply();
-					
 					
 					renderCommentList(commentList);
 				},error: function(){
@@ -137,7 +142,7 @@
 	    
 	    output += '<p style="font-weight: bold; margin-top: 20px;">댓글 목록</p>';
 	    
-	    // 헤더는 고정된 DIV 블록으로 표시 (테이블 헤더 대신 사용)
+	    // 헤더는 고정된 div 블록으로 표시 (테이블 헤더 대신 사용)
 		output += `<div class="comment-header-row">`;
 	    output += `<div style="flex: 0.5;">번호</div>`;
 	    output += `<div style="flex: 1.5; text-align: left;">작성자 / 내용</div>`;
@@ -146,8 +151,8 @@
 	    output += `</div>`;
 
 	    if (commentList && commentList.length > 0) {
-	        for(const comment of commentList){
-//	            const comment = commentList[i];
+	        for(let i = 0; i < commentList.length; i++){
+	            const comment = commentList[i];
 	            
 	            // 현재 댓글이 대댓글인지 확인
 	            let isCurrentReply = comment.parent_comment_id > 0;
@@ -161,31 +166,29 @@
 	            }
 	            
 	            // 댓글 하나의 DIV 블록 시작
-	            output += `<div style="${commentStyle}">`;
-	            
-	            // 1. 번호 (flex: 0.5)
-	            output += `<div style="flex: 0.5;">${comment.comment_id}</div>`;
-	            
-	            // 2. 작성자 및 내용 (flex: 1.5)
-				output += `<div style="flex: 1.5; text-align: left;">`;
-	            output += `<strong>${comment.member_id}</strong> (${comment.created_at})<br>`;
-	            output += `<span>${comment.comment_content}</span>`;
-	            output += `</div>`;
-	            
-	            // 3. 작성시간 (flex: 1)
-	            output += `<div style="flex: 1;"></div>`;
+				// 1. 번호 (flex: 0.5)
+				output += '<div style="flex: 0.5;">' + (comment.comment_id || '') + '</div>';
+				            
+				// 2. 작성자 및 내용 (flex: 1.5)
+				output += '<div style="flex: 1.5; text-align: left;">';
+				output += '<strong>' + (comment.member_id || '') + '</strong> (' + (comment.created_at2 || '') + ')<br>';
+				output += '<span>' + (comment.comment_content || '') + '</span>';
+				output += '</div>';
 
-	            // 4. 대댓글 버튼 (flex: 0.5)
-	            output += `<div style="flex: 0.5;">`;
-	            output += `<input type='button' onclick='fn_open_reply_form(${comment.comment_id})' value='답글'>`;
-	            output += `</div>`;
-	            
-	            output += `</div>`; // <div> 닫기
+				// 3. 작성시간 (flex: 1)
+				output += '<div style="flex: 1;"></div>';
+
+				// 4. 대댓글 버튼 (flex: 0.5)
+				output += '<div style="flex: 0.5;">';
+				output += '<input type=\'button\' onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
+				output += '</div>';
+				output += '</div>'; // <div> 닫기
 	        }
 	    } else {
 	        output += '<p>등록된 댓글이 없습니다.</p>';
 	    }
-
+		
+		//alert(output);
 	    // 최종적으로 comment-list 영역에 삽입
 	    $("#comment-list").html(output); // jQuery 사용으로 변경
 	}		
@@ -194,14 +197,17 @@
 	// -------------------------------------------------------------
 	$(document).ready(function() {
 	    const boardId = "${content_view.board_id}";
-		$("#write-comment-btn").on('click', commentWrite);
-	    if (boardId) {
-	        $.ajax({
+		
+	    if (boardId != null) {
+	       
+			 $.ajax({
 	            type:"get", // 댓글 조회는 GET 방식이 적절
 	            url:"/comment/findAll", // Controller의 findAll 경로에 맞게 수정 필요
+				dataType: "json",
 	            data:{ board_id : boardId },
 	            success: function(initialCommentList){
 	                renderCommentList(initialCommentList);
+					console.log("@# initialCommentList(페이지 로드)=>", initialCommentList);
 	            },
 	            error: function(){
 	                console.log("초기 댓글 목록 로드 실패");

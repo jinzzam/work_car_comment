@@ -38,22 +38,32 @@ public class CommentController {
 		log.info("@# boardIdStr=>"+boardId);
 		
 		CommentDTO comment = new CommentDTO();
-		comment.setComment_id(Integer.parseInt(param.get("comment_id")));
 	    comment.setBoard_id(param.get("board_id")); // String
 	    comment.setMember_id(param.get("member_id"));
 	    comment.setComment_content(param.get("comment_content"));
 	    
-	    try {
-	        comment.setParent_comment_id(Integer.parseInt(param.get("parent_comment_id")));
-	    } catch (NumberFormatException e) {
-	        comment.setParent_comment_id(0); // 예외 발생 시 기본값 0 설정
+	 // DTO 설정 시에만 null/빈 문자열 체크
+	    String parentIdStr = param.get("parent_comment_id");
+	    if (parentIdStr != null && !parentIdStr.isEmpty()) {
+	        // 값이 있을 때만 파싱 시도
+	        try {
+	            comment.setParent_comment_id(Integer.parseInt(parentIdStr));
+	        } catch (NumberFormatException e) {
+	            // 유효하지 않은 숫자일 경우 0으로 처리 (일반 댓글로 간주)
+	            comment.setParent_comment_id(0); 
+	        }
+	    } else if (parentIdStr == null) {
+	        // null 또는 빈 문자열인 경우 0으로 설정 (DTO에서만 사용)
+	        comment.setParent_comment_id(0); 
 	    }
 		
 		service.save(param);
 		
+//		comment.setComment_id(Integer.parseInt(param.get("comment_id")));
+		
 		HashMap<String, String> queryParam = new HashMap<>();
-//		queryParam.put("board_id", Integer.parseInt(param.get("board_id")));
-		queryParam.put("board_id", param.get("board_id")); // String 그대로 전달
+		queryParam.put("board_id", param.get("board_id"));
+//		queryParam.put("board_id", param.get("board_id")); // String 그대로 전달
 		
 		ArrayList<CommentDTO> commentList = service.findAll(queryParam);
 	    
@@ -63,15 +73,15 @@ public class CommentController {
 	@GetMapping("/findAll")
 	public @ResponseBody ArrayList<CommentDTO> findAll(@RequestParam HashMap<String, String> param) {
 		log.info("@# findAll()");
-		log.info("@# param=>"+param);
+		log.info("@# findAll param=>"+param);
 		
 		String boardId = param.get("board_id");
-		log.info("@# boardIdStr=>"+boardId);
+		log.info("@# findAll boardIdStr=>"+boardId);
 		
 		HashMap<String, String> queryParam = new HashMap<>();
-		queryParam.put("board_id", boardId); // String 그대로 전달
+		queryParam.put("board_id", boardId);
 		
-		ArrayList<CommentDTO> commentList = service.findAll(queryParam);
+		ArrayList<CommentDTO> commentList = (ArrayList<CommentDTO>) service.findAll(queryParam);
 		
 		return commentList;
 	    
