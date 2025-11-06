@@ -10,14 +10,16 @@
 <style>
 	.comment-header-row {
 	    display: flex;
+		flex-direction: row;
 	    font-weight: bold;
 	    border-bottom: 2px solid #000;
 	    padding: 5px 0;
 	}
 	.comment-header-row > div {
-	    flex: 1;
-	    text-align: center;
+		    flex: 1;
+		    text-align: center;
 	}
+
 </style>
 <script type="text/javascript">
 
@@ -145,7 +147,7 @@
 	    // 헤더는 고정된 div 블록으로 표시 (테이블 헤더 대신 사용)
 		output += `<div class="comment-header-row">`;
 	    output += `<div style="flex: 0.5;">번호</div>`;
-	    output += `<div style="flex: 1.5; text-align: left;">작성자 / 내용</div>`;
+	    output += `<div style="flex: 1.5; text-align: center;">작성자 / 내용</div>`;
 	    output += `<div style="flex: 1;">작성시간</div>`;
 	    output += `<div style="flex: 0.5;">답글</div>`;
 	    output += `</div>`;
@@ -158,30 +160,34 @@
 	            let isCurrentReply = comment.parent_comment_id > 0;
 	            
 	            // 기본 스타일
-	            let commentStyle = `border: 1px solid #007bff; margin-bottom: 5px; padding: 5px; display: flex; align-items: center;`;
-	                    
+//	            let commentStyle = `border: 1px solid #007bff; margin-bottom: 5px; padding: 5px; display: flex; align-items: center;`;
+				let rowStyle = `border: 1px solid #007bff; margin-bottom: 5px; padding: 5px; display: flex; align-items: center;`;        
+				
 	            if(isCurrentReply){
-	                // 대댓글인 경우 들여쓰기
-	                commentStyle += `padding-left: ${paddingLeft};`;
+	                // 대댓글인 경우 들여쓰
+	                rowStyle += `padding-left: ${paddingLeft};`;
 	            }
 	            
+				output += '<div style="' + rowStyle + '">';
+					
 	            // 댓글 하나의 DIV 블록 시작
 				// 1. 번호 (flex: 0.5)
-				output += '<div style="flex: 0.5;">' + (comment.comment_id || '') + '</div>';
+				output += '<div style="flex: 0.5; text-align: center;">' + (comment.comment_id || '') + '</div>';
 				            
 				// 2. 작성자 및 내용 (flex: 1.5)
-				output += '<div style="flex: 1.5; text-align: left;">';
-				output += '<strong>' + (comment.member_id || '') + '</strong> (' + (comment.created_at2 || '') + ')<br>';
-				output += '<span>' + (comment.comment_content || '') + '</span>';
+				output += '<div style="' + rowStyle + 'flex: 1.5; text-align: left;">';
+				output += '<div style="width: 30%; border: 1px solid #007bff;"><strong>' + (comment.member_id || '') + '</strong></div> <div style="width:70%; border: 1px solid #007bff;">(' + (comment.comment_content || '') + ')</div>';
 				output += '</div>';
 
 				// 3. 작성시간 (flex: 1)
-				output += '<div style="flex: 1;"></div>';
+		//		output += '<div style="flex: 1;"></div>';
+				output += '<div style="flex: 1; text-align: center;">' + (comment.created_at2 || '') + '</div>';
 
 				// 4. 대댓글 버튼 (flex: 0.5)
-				output += '<div style="flex: 0.5;">';
+				output += '<div style="flex: 0.5; text-align: center">';
 				output += '<input type=\'button\' onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
 				output += '</div>';
+				
 				output += '</div>'; // <div> 닫기
 	        }
 	    } else {
@@ -190,7 +196,7 @@
 		
 		//alert(output);
 	    // 최종적으로 comment-list 영역에 삽입
-	    $("#comment-list").html(output); // jQuery 사용으로 변경
+	    $("#comment-list").html(output); 
 	}		
 	// -------------------------------------------------------------
 	// 페이지 로드 후 초기 댓글 목록을 AJAX로 가져와 렌더링 
@@ -202,7 +208,7 @@
 	       
 			 $.ajax({
 	            type:"get", // 댓글 조회는 GET 방식이 적절
-	            url:"/comment/findAll", // Controller의 findAll 경로에 맞게 수정 필요
+	            url:"/comment/findAll", 
 				dataType: "json",
 	            data:{ board_id : boardId },
 	            success: function(initialCommentList){
