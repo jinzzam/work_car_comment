@@ -101,16 +101,13 @@
 			<input type="text" id="member_id" placeholder="작성자">
 			<input type="text" id="comment_content" placeholder="내용">
 			<button id="write-comment-btn">새 댓글작성</button>
-			</div>
+		</div>
 
 		<div id="comment-list">
 		</div>
 	
 
 <script>
-	//	$("#write-comment-btn").on('click', commentWrite());
-	//	$("#write-comment-btn").on('click', commentWrite);
-	
 	// '댓글 작성' 버튼에 대한 이벤트 핸들러 (최상단 폼)
 	$("#write-comment-btn").off('click').on('click', function() {
 	    commentWrite(null); // 최상위 댓글 작성 (parentCommentId = null)
@@ -188,35 +185,42 @@
 	 */
 	function renderCommentList(commentList) {
 	    const paddingLeft = '25px'; 
-	    let output = ''; 
+//	    let output = ''; 
+//		var targetRowId;
+//		let isCurrentReply = false;
 	    
-	    output += '<p style="font-weight: bold; margin-top: 20px;">댓글 목록</p>';
-	    
+		$("#comment-list").empty();
 	    // 헤더는 고정된 div 블록으로 표시 (테이블 헤더 대신 사용)
-		output += `<div class="comment-header-row">`;
-	    output += `<div style="flex: 0.5;">번호</div>`;
-	    output += `<div style="flex: 1.5; text-align: left;">작성자 / 내용</div>`;
-	    output += `<div style="flex: 1;">작성시간</div>`;
-	    output += `<div style="flex: 0.5;">답글</div>`;
-	    output += `</div>`;
+		let headerOutput = '';
+		
+	    headerOutput += '<p style="font-weight: bold; margin-top: 20px;">댓글 목록</p>';
+		headerOutput += `<div class="comment-header-row">`;
+	    headerOutput += `<div style="flex: 0.5;">번호</div>`;
+	    headerOutput += `<div style="flex: 1.5; text-align: left;">작성자 / 내용</div>`;
+	    headerOutput += `<div style="flex: 1;">작성시간</div>`;
+	    headerOutput += `<div style="flex: 0.5;">답글</div>`;
+	    headerOutput += `</div>`;
+		
+		$("#comment-list").append(headerOutput); // 헤더를 먼저 삽입
 
 	    if (commentList && commentList.length > 0) {
 	        for(let i = 0; i < commentList.length; i++){
 	            const comment = commentList[i];
-	            
+				
 	            // 현재 댓글이 대댓글인지 확인
-	            let isCurrentReply = comment.parent_comment_id > 0;
+				let isCurrentReply = comment.parent_comment_id > 0;
+//				targetRowId = "#comment-show-box-" + comment.parent_comment_id;
 	            
 				let rowStyle = `border: 1px solid #007bff; margin-bottom: 5px; padding: 5px; display: flex; align-items: center;`;        
+				let commentHtml = ''; // 각 댓글의 HTML을 담을 변수
 				
-			//	let replyImg = `<i class="fa-solid fa-share fa-flip-vertical" style="color: #335fe6;"></i>`;
 	            if(isCurrentReply){
 	                // 대댓글인 경우 들여쓰기
 	                rowStyle += `padding-left: ` + paddingLeft + `;`;
-					output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">';
-					output += `<i class="fa-solid fa-share fa-flip-vertical" style="color: #335fe6;"></i>`; 
+					commentHtml += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" class="reply-of-' + comment.parent_comment_id + '" style="' + rowStyle + '">';
+					commentHtml += `<i class="fa-solid fa-share fa-flip-vertical" style="color: #335fe6;"></i>`; 
 	            } else{
-					output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
+					commentHtml += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
 				}
 	            
 				//output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
@@ -224,49 +228,68 @@
 					
 	            // 댓글 하나의 DIV 블록 시작
 				// 1. 번호 (flex: 0.5)
-				output += '<div style="flex: 0.5; text-align: center;">' + (comment.comment_id || '') + '</div>';
+				commentHtml += '<div style="flex: 0.5; text-align: center;">' + (comment.comment_id || '') + '</div>';
 
 				// 2. 작성자 및 내용 (flex: 1.5)
-				output += '<div style="flex: 1.5; text-align: left;">';
-				output += '<strong>' + (comment.member_id || '') + '</strong>: ' + (comment.comment_content || '');
-            	output += '</div>';
+				commentHtml += '<div style="flex: 1.5; text-align: left;">';
+				commentHtml += '<strong>' + (comment.member_id || '') + '</strong>: ' + (comment.comment_content || '');
+            	commentHtml += '</div>';
 
 				// 3. 작성시간 (flex: 1)
-		//		output += '<div style="flex: 1;"></div>';
-				output += '<div style="flex: 1; text-align: center;">' + (comment.created_at2 || '') + '</div>';
+		//		commentHtml += '<div style="flex: 1;"></div>';
+				commentHtml += '<div style="flex: 1; text-align: center;">' + (comment.created_at2 || '') + '</div>';
 
 				// 4. 대댓글 버튼 (flex: 0.5)
-				output += '<div style="flex: 0.5; text-align: center">';
-				output += '<input type="button" onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
-				output += '</div>';
+				commentHtml += '<div style="flex: 0.5; text-align: center">';
+				commentHtml += '<input type="button" onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
+				commentHtml += '</div>';
 				
+				commentHtml += '</div>'; // comment-show-box <div> 닫기 : 댓글 한 줄 끝
+					
 				/* 대댓글 새 블록 자리 */
+//				commentHtml += '<div id="reply-show-box-' + (comment.parent_comment_id || 0) + '">';
+//				commentHtml += '</div>';
 				
-				/*
-				JQurey 요소선택
-				버튼 클릭하면 div #comment-write-box
-				대댓글 작성하면 div #comment-show-box
-				
+//				댓글 삽입 위치 결정
+				if(isCurrentReply){
+	                // 대댓글인 경우: 부모 댓글 요소 바로 뒤에 삽입
+	                const parentId = comment.parent_comment_id;
+//					부모 댓글 ID를 가진 대댓글들의 목록을 찾음
+	                const $existingReplies = $(".reply-of-" + parentId);
+					
+						if ($existingReplies.length > 0) {
+		                    // 2. 이미 존재하는 대댓글이 있다면, 그 중 가장 마지막 요소 뒤에 삽입합니다.
+							// 마지막 대댓글의 ID: $("#comment-show-box-103") 뒤에 삽입
+		                    $existingReplies.last().after(commentHtml);
+		                } else {
+		                    // 3. 존재하는 대댓글이 없다면, 부모 댓글 (#comment-show-box-35) 바로 뒤에 삽입합니다.
+		                    $("#comment-show-box-" + parentId).after(commentHtml);
+		                }
+					
+	                // 부모 댓글의 ID를 사용하여 부모 요소 선택 후 .after()로 삽입
+//	                $("#comment-show-box-" + parentId).after(commentHtml);
+		            } else {
+		                // 일반 댓글인 경우: 댓글 목록의 맨 뒤에 추가
+		                $("#comment-list").append(commentHtml); 
+		            }
 
-				output += '<div id="container">';
-				output += 	'<div class="toggle-switch">';
-				output +=	'<input type="checkbox" id="toggle" hidden>'; 
-				output +=	'<label for="toggle" class="toggleSwitch">';
-				output += 		'<span class="toggleButton">대댓</span>';
-				output +=	'</label>';
-				output +=	'</div>';
-				output += '</div>';
-				*/
-				output += '</div>'; // comment-show-box <div> 닫기 : 댓글 한 줄 끝
-	        }
-	    } else {
-	        output += '<p>등록된 댓글이 없습니다.</p>';
+						//$("#comment-list").html(commentHtml); 
+						// *주의*: 답글 폼을 부모 댓글 뒤에만 추가하려면 `isCurrentReply`가 `false`일 때만 실행해야 합니다.
+						if(!isCurrentReply){
+			                 let replyFormHtml = '<div id="reply-form-box-' + (comment.comment_id || 0) + '"></div>';
+			                 $("#comment-show-box-" + (comment.comment_id || 0)).after(replyFormHtml);
+			            }
+	        		}
+			 	} else {
+	        $("#comment-list").append('<p>등록된 댓글이 없습니다.</p>');
+			}
 	    }
 		
-		//alert(output);
+		// debug
+		// alert(output);
+		
 	    // 최종적으로 comment-list 영역에 삽입
-	    $("#comment-list").html(output); 
-	}		
+			
 	// -------------------------------------------------------------
 	// 페이지 로드 후 초기 댓글 목록을 AJAX로 가져와 렌더링 
 	// -------------------------------------------------------------
@@ -290,6 +313,7 @@
 	        });
 	    } // end of if
 
+		/*
 		$("#toggle").change(function(){
 	        if($(this).is(":checked")){ 
 	            $("#comment-list").show();
@@ -297,5 +321,6 @@
 	            $("#comment-list").hide(); 
 	        }
 		});//end of toggle
+		*/
 	});
 </script>
