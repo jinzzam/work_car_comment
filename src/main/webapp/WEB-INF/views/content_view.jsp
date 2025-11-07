@@ -6,6 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <script src="${pageContext.request.contextPath}/js/jquery.js"></script>
 <style>
 	.comment-header-row {
@@ -38,8 +39,8 @@
     
     const replyFormHtml = `
         <div class="reply-form-box" style="padding-left: 30px; border-left: 5px solid #ccc; margin-top: 10px; margin-bottom: 10px;">
-            <h4>대댓글 작성 (TO: ${parent_comment_id})</h4>
-            <div class="reply-form-area" data-parent-id="${parent_comment_id}">
+            <h4>대댓글 작성 (TO: ` + parent_comment_id + `)</h4>
+            <div class="reply-form-area" data-parent-id="` + parent_comment_id + `">
                 <input type="text" class="reply-member-id" placeholder="작성자">
                 <input type="text" class="reply-comment-content" placeholder="내용">
                 <button class="reply-write-btn">작성</button>
@@ -57,6 +58,7 @@
     
     console.log("@# 부모 댓글 번호=>" + parent_comment_id);
     console.log(">> 대댓글 작성 폼 삽입 완료.");
+	}
 			
 // ========================fn_cancel_reply() =====================
 		// '대댓글 취소' 버튼 클릭 시 호출될 함수
@@ -68,6 +70,7 @@
 	}
 		
 </script>
+
 </head>
 <body>
 	<div style="margin-bottom: 30px;">
@@ -97,7 +100,7 @@
 			<input type="hidden" id="parent_comment_id" value=""> 
 			<input type="text" id="member_id" placeholder="작성자">
 			<input type="text" id="comment_content" placeholder="내용">
-			<button id="write-comment-btn">댓글작성</button>
+			<button id="write-comment-btn">새 댓글작성</button>
 			</div>
 
 		<div id="comment-list">
@@ -105,87 +108,86 @@
 	
 
 <script>
-//	$("#write-comment-btn").on('click', commentWrite());
-//	$("#write-comment-btn").on('click', commentWrite);
-
-// '댓글 작성' 버튼에 대한 이벤트 핸들러 (최상단 폼)
-$("#write-comment-btn").off('click').on('click', function() {
-    commentWrite(null); // 최상위 댓글 작성 (parentCommentId = null)
-});
-
-// 동적으로 생성된 '대댓글 작성' 버튼에 대한 이벤트 핸들러
-$(document).off('click', '.reply-write-btn').on('click', '.reply-write-btn', function() {
-    // 부모 ID는 data 속성에서 가져옴
-    const $formArea = $(this).closest('.reply-form-area');
-    const parentCommentId = $formArea.data('parent-id');
-    
-    commentWrite(parentCommentId, $formArea);
-});
-
-	function commentWrite(parentCommentId, $replyFormArea) {
-
-		let writer;
-		let commentContent;
-		
-		if (parentCommentId) {
-			// 대댓글 작성 모드
-			writer = $replyFormArea.find('.reply-member-id').val();
-			commentContent = $replyFormArea.find('.reply-comment-content').val();
-		} else {
-			// 최상위 댓글 작성 모드
-			writer = $("#member_id").val();
-			commentContent = $("#comment_content").val();
-		}
-		
-		writer = $("#member_id").val();
-		commentContent = $("#comment_content").val();
-		const boardId = "${content_view.board_id}";
-		// let parentCommentId = $("#parent_comment_id").val();
-		
-		if (parentCommentId === '' || parentCommentId === undefined || parentCommentId === null) {
-				parentCommentId = null; 
-		}
-		
-		if (!writer || !commentContent) {
-			alert("작성자와 내용을 모두 입력해주세요.");
-			return; 
-		}
-		
-		$.ajax({
-			type:"post"
-			,url:"/comment/save"
-			,dataType: "json"
-			,data:{
-				board_id : boardId,
-				member_id : writer,
-				comment_content : commentContent,
-				parent_comment_id : parentCommentId
+	//	$("#write-comment-btn").on('click', commentWrite());
+	//	$("#write-comment-btn").on('click', commentWrite);
+	
+	// '댓글 작성' 버튼에 대한 이벤트 핸들러 (최상단 폼)
+	$("#write-comment-btn").off('click').on('click', function() {
+	    commentWrite(null); // 최상위 댓글 작성 (parentCommentId = null)
+	});
+	
+	// 동적으로 생성된 '대댓글 작성' 버튼에 대한 이벤트 핸들러
+	$(document).off('click', '.reply-write-btn').on('click', '.reply-write-btn', function() {
+	    // 부모 ID는 data 속성에서 가져옴
+	    const $formArea = $(this).closest('.reply-form-area');
+	    const parentCommentId = $formArea.data('parent-id');
+	    
+	    commentWrite(parentCommentId, $formArea);
+	});
+	
+		function commentWrite(parentCommentId, $replyFormArea) {
+	
+			let writer;
+			let commentContent;
+			
+			// 모드에 따라 작성자와 댓글 내용 알맞은 곳에서 가져옴
+			if (parentCommentId) {
+				// 대댓글 작성 모드
+				writer = $replyFormArea.find('.reply-member-id').val();
+				commentContent = $replyFormArea.find('.reply-comment-content').val();
+			} else {
+				// 최상위 댓글 작성 모드
+				writer = $("#member_id").val();
+				commentContent = $("#comment_content").val();
 			}
-			,success: function(commentList){
-				console.log("작성 성공");
-				console.log("@# 작성 후=>" + commentList);
-				
-				// 폼 초기화 및 대댓글 모드 해제
-				if (parentCommentId) {
-					fn_cancel_reply(); // 동적 폼 제거
-				} else{
-					$("#member_id").val('');
-					$("#comment_content").val('');
+			
+			const boardId = "${content_view.board_id}";
+			// let parentCommentId = $("#parent_comment_id").val();
+			
+			if (parentCommentId === '' || parentCommentId === undefined || parentCommentId === null) {
+					parentCommentId = null; 
+			}
+			
+			if (!writer || !commentContent) {
+				alert("작성자와 내용을 모두 입력해주세요.");
+				return; 
+			}
+			
+			$.ajax({
+				type:"post"
+				,url:"/comment/save"
+				,dataType: "json"
+				,data:{
+					board_id : boardId,
+					member_id : writer,
+					comment_content : commentContent,
+					parent_comment_id : parentCommentId
 				}
-				renderCommentList(commentList);
-
-			},error: function(){
-				console.log("작성 실패");
-			}
-		});
-	}
-		
+				,success: function(commentList){
+					console.log("작성 성공");
+					console.log("@# 작성 후=>" + commentList);
+					
+					// 폼 초기화 및 대댓글 모드 해제
+					if (parentCommentId) {
+						fn_cancel_reply(); // 동적 폼 제거
+					} else{
+						$("#member_id").val('');
+						$("#comment_content").val('');
+					}
+					renderCommentList(commentList);
+	
+				},error: function(){
+					console.log("작성 실패");
+				}
+			});
+		}
+			
 	// ========================renderCommentList(commentList) =====================
 	/**
 	 * 댓글 목록 배열을 받아 HTML을 생성하고 화면에 출력합니다.
 	 */
 	function renderCommentList(commentList) {
-	    const paddingLeft = '30px'; 
+	    const paddingLeft = '25px'; 
 	    let output = ''; 
 	    
 	    output += '<p style="font-weight: bold; margin-top: 20px;">댓글 목록</p>';
@@ -207,19 +209,23 @@ $(document).off('click', '.reply-write-btn').on('click', '.reply-write-btn', fun
 	            
 				let rowStyle = `border: 1px solid #007bff; margin-bottom: 5px; padding: 5px; display: flex; align-items: center;`;        
 				
+			//	let replyImg = `<i class="fa-solid fa-share fa-flip-vertical" style="color: #335fe6;"></i>`;
 	            if(isCurrentReply){
 	                // 대댓글인 경우 들여쓰기
-	                rowStyle += `padding-left: ${paddingLeft};`;
-	            }
+	                rowStyle += `padding-left: ` + paddingLeft + `;`;
+					output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">';
+					output += `<i class="fa-solid fa-share fa-flip-vertical" style="color: #335fe6;"></i>`; 
+	            } else{
+					output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
+				}
 	            
+				//output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
 				// output += '<div id="comment-show-box" style="' + rowStyle + '">';
-				output += '<div id="comment-show-box-' + (comment.comment_id || 0) + '" style="' + rowStyle + '">'; 
 					
 	            // 댓글 하나의 DIV 블록 시작
 				// 1. 번호 (flex: 0.5)
 				output += '<div style="flex: 0.5; text-align: center;">' + (comment.comment_id || '') + '</div>';
 
-				// 대댓글 : 상자 속의 새 div 블록
 				// 2. 작성자 및 내용 (flex: 1.5)
 				output += '<div style="flex: 1.5; text-align: left;">';
 				output += '<strong>' + (comment.member_id || '') + '</strong>: ' + (comment.comment_content || '');
@@ -231,7 +237,7 @@ $(document).off('click', '.reply-write-btn').on('click', '.reply-write-btn', fun
 
 				// 4. 대댓글 버튼 (flex: 0.5)
 				output += '<div style="flex: 0.5; text-align: center">';
-				output += '<input type=\'button\' onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
+				output += '<input type="button" onclick="fn_open_reply_form(\'' + (comment.comment_id || 0) + '\')" value=\'답글\'>';
 				output += '</div>';
 				
 				/* 대댓글 새 블록 자리 */
