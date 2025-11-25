@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.boot.dao.CommentDAO;
+import com.boot.dto.CommentCriteria;
 import com.boot.dto.CommentDTO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,14 @@ public class CommentServiceImpl implements CommentService{
 		ArrayList<CommentDTO> list = dao.findAll(param);
 		log.info("@# list =>" + list);
 		return list;
+	}
+
+	@Override
+	public CommentCriteria root(int id) {
+		CommentDAO dao = sqlSession.getMapper(CommentDAO.class);
+		CommentCriteria cc = dao.root(id);
+		log.info("@# CommentCriteria =>" + cc);
+		return cc;
 	}
 
 }

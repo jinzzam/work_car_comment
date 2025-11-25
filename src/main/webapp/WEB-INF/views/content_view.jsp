@@ -106,6 +106,43 @@
 		<div id="comment-list">
 		</div>
 	
+		<h3>${pageMaker}</h3>
+			<div class="div_page">
+				<ul>
+					<c:if test="${pageMaker.prev}">
+						<!-- <li class="paginate_button">[Previous]</li> -->
+						<li class="paginate_button">
+							<a href="${pageMaker.startPage - 1}">
+								[Previous]
+							</a>
+						</li>
+					</c:if>
+					<c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
+						<!-- <li>[${num}]</li> -->
+						<li class="paginate_button" ${pageMaker.cri.pageNum == num ? "style='color:red'" : ""}>
+							<a href="${num}">
+								[${num}]
+							</a>
+						</li>
+					</c:forEach>
+					<c:if test="${pageMaker.next}">
+						<!-- <li class="paginate_button">[Next]</li> -->
+						<li class="paginate_button">
+							<a href="${pageMaker.endPage + 1}">
+								[Next]
+							</a>
+						</li>
+					</c:if>
+				</ul>
+			</div>
+		</body>
+		<form method="get" id="actionForm" action="list">
+		<!-- <form method="get" id="actionForm"> -->
+			<input type="hidden" name="pageNum" value="${pageMaker.cri.pageNum}">
+			<input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+		</form>
+
+		</html>
 
 <script>
 	// '댓글 작성' 버튼에 대한 이벤트 핸들러 (최상단 폼)
@@ -122,62 +159,62 @@
 	    commentWrite(parentCommentId, $formArea);
 	});
 	
-		function commentWrite(parentCommentId, $replyFormArea) {
-	
-			let writer;
-			let commentContent;
-			
-			// 모드에 따라 작성자와 댓글 내용 알맞은 곳에서 가져옴
-			if (parentCommentId) {
-				// 대댓글 작성 모드
-				writer = $replyFormArea.find('.reply-member-id').val();
-				commentContent = $replyFormArea.find('.reply-comment-content').val();
-			} else {
-				// 최상위 댓글 작성 모드
-				writer = $("#member_id").val();
-				commentContent = $("#comment_content").val();
-			}
-			
-			const boardId = "${content_view.board_id}";
-			// let parentCommentId = $("#parent_comment_id").val();
-			
-			if (parentCommentId === '' || parentCommentId === undefined || parentCommentId === null) {
-					parentCommentId = null; 
-			}
-			
-			if (!writer || !commentContent) {
-				alert("작성자와 내용을 모두 입력해주세요.");
-				return; 
-			}
-			
-			$.ajax({
-				type:"post"
-				,url:"/comment/save"
-				,dataType: "json"
-				,data:{
-					board_id : boardId,
-					member_id : writer,
-					comment_content : commentContent,
-					parent_comment_id : parentCommentId
-				}
-				,success: function(commentList){
-					console.log("작성 성공");
-					console.log("@# 작성 후=>" + commentList);
-					
-					// 폼 초기화 및 대댓글 모드 해제
-					if (parentCommentId) {
-						fn_cancel_reply(); // 동적 폼 제거
-					} else{
-						$("#member_id").val('');
-						$("#comment_content").val('');
-					}
-					renderCommentList(commentList);
-	
-				},error: function(){
-					console.log("작성 실패");
-				}
-			});
+	function commentWrite(parentCommentId, $replyFormArea) {
+
+		let writer;
+		let commentContent;
+		
+		// 모드에 따라 작성자와 댓글 내용 알맞은 곳에서 가져옴
+		if (parentCommentId) {
+			// 대댓글 작성 모드
+			writer = $replyFormArea.find('.reply-member-id').val();
+			commentContent = $replyFormArea.find('.reply-comment-content').val();
+		} else {
+			// 최상위 댓글 작성 모드
+			writer = $("#member_id").val();
+			commentContent = $("#comment_content").val();
 		}
+		
+		const boardId = "${content_view.board_id}";
+		// let parentCommentId = $("#parent_comment_id").val();
+		
+		if (parentCommentId === '' || parentCommentId === undefined || parentCommentId === null) {
+				parentCommentId = null; 
+		}
+		
+		if (!writer || !commentContent) {
+			alert("작성자와 내용을 모두 입력해주세요.");
+			return; 
+		}
+		
+		$.ajax({
+			type:"post"
+			,url:"/comment/save"
+			,dataType: "json"
+			,data:{
+				board_id : boardId,
+				member_id : writer,
+				comment_content : commentContent,
+				parent_comment_id : parentCommentId
+			}
+			,success: function(commentList){
+				console.log("작성 성공");
+				console.log("@# 작성 후=>" + commentList);
+				
+				// 폼 초기화 및 대댓글 모드 해제
+				if (parentCommentId) {
+					fn_cancel_reply(); // 동적 폼 제거
+				} else{
+					$("#member_id").val('');
+					$("#comment_content").val('');
+				}
+				renderCommentList(commentList);
+
+			},error: function(){
+				console.log("작성 실패");
+			}
+		});
+	}
 			
 	// ========================renderCommentList(commentList) =====================
 	/**
@@ -323,4 +360,36 @@
 		});//end of toggle
 		*/
 	});
+	//=====================페이징==================================
+	var actionForm = $("#actionForm");
+
+	// 페이지 번호 처리
+	$(".paginate_button a").on("click", function (e){
+		e.preventDefault();
+		console.log("click!");
+		console.log("@# href=>" + $(this).attr('href'));
+
+		actionForm.find("input[name='pageNum']").val($(this).attr('href'));
+		actionForm.submit();
+		// 버그 처리 (게시글 클릭 후 뒤로가기 누른 후 다른 페이지 클릭할 때 content_view가 작동되는 것을 해결)
+		// actionForm.attr("action", "list").submit();
+
+	}); // end of paginate_button click
+	
+	// 게시글 처리
+	$(".move_link").on("click", function (e){
+		e.preventDefault();
+		console.log("move_link click!");
+		console.log("@# href=>" + $(this).attr('href'));
+
+		var targetBno = $(this).attr('href');
+
+		// 버그 처리 (게시글 클릭 후 뒤로가기 누른 후 다른 게시글 클릭할 때 %boardNo=번호 누적되는거 방지)
+		// var bno = actionForm.find("input[name='boardNo']").val();
+		// if (bno!= "") {
+		// 	bno = actionForm.find("input[name='boardNo']").remove();
+		// }
+		actionForm.append("<input type='hidden' name='board_id' value='"+targetBno+"'>");
+		actionForm.attr("action", "content_view").submit();
+	}); // end of paginate_button click
 </script>

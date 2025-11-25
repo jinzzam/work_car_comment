@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.boot.dto.CommentCriteria;
 import com.boot.dto.CommentDTO;
 import com.boot.dto.MemDTO;
 import com.boot.service.CommentService;
@@ -87,6 +88,15 @@ public class CommentController {
 	    
 	}
 	
+	@GetMapping("/root")
+	public @ResponseBody CommentCriteria root(@RequestParam int id){
+		log.info("@# root()");
+		log.info("@# root id =>" + id);
+		
+		CommentCriteria cc = service.root(id);
+		
+		return cc;
+	}
 
 	
 }

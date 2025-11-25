@@ -13,14 +13,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.boot.dto.BoardDTO;
+import com.boot.dto.CommentDTO;
 import com.boot.dto.MemDTO;
 import com.boot.service.BoardService;
+import com.boot.service.CommentService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
 public class BoardController {
+	@Autowired
+	private BoardService service;
+	
+	@Autowired
+	private CommentService commentService;
 	
 	static String checkSession(HttpSession session) {
 		MemDTO mDTO = (MemDTO) session.getAttribute("LOGIN_MEMBER");
@@ -31,10 +38,8 @@ public class BoardController {
 		return "OK";
 	}
 	
-	@Autowired
-	private BoardService service;
 	
-	@RequestMapping("/list")
+	@RequestMapping("/list_old")
 //	public String list(Model model) {
 	public String list(Model model, HttpServletRequest request) {
 		String result = checkSession(request.getSession());
@@ -84,9 +89,15 @@ public class BoardController {
 		}
 		
 		log.info("@# content_view()");
+		log.info("@# param=>"+param);
 		
-		BoardDTO dto = service.contentView(param);
-		model.addAttribute("content_view", dto);
+		// 해당 게시글에 작성된 댓글 리스트를 가져옴
+		ArrayList<CommentDTO> commentList = commentService.findAll(param);
+		log.info("@# commentList=>"+commentList);
+		
+		model.addAttribute("commentList", commentList);
+		
+		model.addAttribute("pageMaker", param);
 		
 		return "content_view";
 	}

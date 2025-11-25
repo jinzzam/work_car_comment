@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.boot.dto.CommentCriteria;
 import com.boot.dto.CommentDTO;
 
 //public class BoardDAO {
@@ -13,6 +14,6 @@ public interface CommentDAO {
 	public ArrayList<CommentDTO> findAll(HashMap<String, String> param);
 	public ArrayList<CommentDTO> findAll(@Param("paramMap") HashMap<String, String> param
 										,@Param("board_id") int board_id);
-
+	public CommentCriteria root(int id);
 }
 

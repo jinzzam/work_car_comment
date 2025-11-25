@@ -5,9 +5,11 @@ import java.util.HashMap;
 
 import org.springframework.ui.Model;
 
+import com.boot.dto.CommentCriteria;
 import com.boot.dto.CommentDTO;
 
 public interface CommentService {
 	public void save(HashMap<String, String> param);
 	public ArrayList<CommentDTO> findAll(HashMap<String, String> param);
+	public CommentCriteria root(int id);
 }

@@ -1,0 +1,25 @@
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.PageDAO">
+
+	<select id="listWithPaging" resultType="com.boot.dto.BoardDTO">
+    	<![CDATA[
+		  select board_id, member_id, title, content, created_at, view_count
+			from ( select rownum , board_id, member_id, title, content, created_at, view_count
+					 from ( select row_number() over(order by board_id desc) as rownum
+								 , board_id, member_id, title, content, created_at, view_count
+							  from board_tb
+							 order by board_id desc
+							) a
+					where rownum <= (#{pageNum} * #{amount})
+				) aa
+			where rownum > (#{pageNum}-1) * #{amount}
+		]]>
+    </select>
+
+    <select id="getTotalCount" resultType="int">
+		select count(*) from board_tb
+    </select>
+</mapper>

@@ -3,32 +3,6 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.boot.dao.CommentDAO">
-		
-<!--		<insert id="save" parameterType="java.util.HashMap"> -->
-<!--			insert into board_comment_tb( 		-->
-<!--			   	   board_id 	-->
-<!--			     , member_id -->
-<!--		<if test="parent_comment_id != null and parent_comment_id != '' and parent_comment_id != '0'">-->
-<!--		 	     , parent_comment_id	-->
-<!--		</if>-->
-<!--		 	     , comment_content)-->
-<!--			values (#{board_id}, #{member_id}, -->
-<!--		<if test="parent_comment_id != null and parent_comment_id != '' and parent_comment_id != '0'">-->
-<!--		 		   #{parent_comment_id}, -->
-<!--		</if>-->
-<!--				   #{comment_content})-->
-<!--    </insert>-->
-
-<!--	<insert id="save" parameterType="java.util.HashMap"> -->
-<!--		insert into board_comment_tb( 		-->
-<!--		   	   board_id 	-->
-<!--		     , member_id -->
-<!--	 	     , parent_comment_id	-->
-<!--	 	     , comment_content)-->
-<!--		values (#{board_id}, #{member_id}, -->
-<!--	 		   #{parent_comment_id}, -->
-<!--			   #{comment_content})-->
-<!--</insert>-->
 
 	<insert id="save" parameterType="java.util.HashMap"> 
 	    insert into board_comment_tb( 		
@@ -61,6 +35,53 @@
 		      FROM board_comment_tb
 		     WHERE board_id = #{board_id}
 		     ORDER BY comment_id
+    </select>
+    
+    <select id="root" parameterType="int" resultType="com.boot.dto.CommentCriteria">
+    	SET @start_comment_id = #{start_comment_id}; 
+
+		WITH RECURSIVE CommentHierarchy AS (
+<!--		     1. 앵커 멤버 (Anchor Member): 재귀의 시작점-->
+		    SELECT
+		        T.comment_id,
+		        T.parent_comment_id,
+		        T.comment_content,
+		        0 AS level_depth,
+		        T.comment_id AS root_comment_id_tracker,    
+		        T.parent_comment_id AS nearest_parent_id    
+		    FROM
+		        board_comment_tb T
+		    WHERE
+		        T.comment_id = @start_comment_id
+		        
+		    UNION ALL
+		    
+<!--		     2. 재귀 멤버 (Recursive Member): 부모를 찾아 올라감-->
+		    SELECT
+		        T.comment_id,
+		        T.parent_comment_id,
+		        T.comment_content,
+		        CH.level_depth + 1 AS level_depth,
+		        T.comment_id AS root_comment_id_tracker,   
+		        CH.nearest_parent_id                         
+		    FROM
+		        board_comment_tb T
+		    INNER JOIN
+		        CommentHierarchy CH ON T.comment_id = CH.parent_comment_id
+		    WHERE
+		        CH.parent_comment_id IS NOT NULL            
+		)
+<!--		 3. 최종 결과 선택: 추적 시작 ID, 바로 윗 부모 ID, 루트 ID 순서로 출력-->
+		SELECT
+		    @start_comment_id AS start_comment_id,     
+		    CH.nearest_parent_id,                     
+		    CH.comment_id AS root_comment_id,           
+		    CH.level_depth
+		FROM
+		    CommentHierarchy CH
+		WHERE 
+		    CH.parent_comment_id IS NULL 
+		LIMIT 1;
     </select>
 
 </mapper>
